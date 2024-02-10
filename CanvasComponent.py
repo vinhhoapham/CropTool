@@ -1,5 +1,6 @@
 from tkinter import Canvas
 
+
 class CanvasComponent:
     def __init__(self, master, on_move_press, on_click):
         self.canvas = Canvas(master, cursor="cross")

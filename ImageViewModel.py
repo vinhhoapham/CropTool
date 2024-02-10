@@ -14,9 +14,6 @@ class ImageViewModel:
     def get_resized_image(self):
         return self.model.get_resized_image()
 
-    def crop_image(self, crop_coords):
-        return self.model.crop_image(crop_coords)
-
     def fill_image(self, crop_coords):
         return self.model.fill_image(crop_coords)
 
@@ -32,5 +29,12 @@ class ImageViewModel:
     def update_image_path(self, image_path):
         self.model.path = image_path
 
-    def export_image(self, image):
-        self.model.export_image(image)
+    def export_image(self, image, file_path):
+        self.model.export_image(image, file_path)
+
+    def move_image(self, vector):
+        self.model.image_displacement.move(vector)
+
+    def get_file_path(self):
+        return self.model.path
+

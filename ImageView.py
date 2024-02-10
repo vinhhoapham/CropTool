@@ -1,10 +1,11 @@
 from tkinter import Tk, filedialog
-from PIL import ImageTk
+from PIL import ImageTk, Image
 
 from MenuBarComponent import MenuBarComponent
 from StatusBarComponent import StatusBarComponent
 from CanvasComponent import CanvasComponent
 from ControlPanelComponent import ControlPanelComponent
+from PathHandling import get_default_cropped_file_path, get_dir
 
 
 class ImageView:
@@ -18,6 +19,7 @@ class ImageView:
         self.center_circle = None
         self.tk_image = None
         self.image_on_canvas = None
+        self.master.title = 'Crop and Center Tool'
 
         # Initialize components
         self.menubar = MenuBarComponent(master, self.load_image, master.quit)
@@ -42,7 +44,6 @@ class ImageView:
                 self.canvas_component.canvas.itemconfig(self.image_on_canvas, image=self.tk_image)
             else:
                 self.image_on_canvas = self.canvas_component.canvas.create_image(0, 0, anchor="nw", image=self.tk_image)
-
 
     def zoom_in(self):
         self.view_model.zoom_in()
@@ -93,18 +94,38 @@ class ImageView:
             coords = self.canvas_component.canvas.coords(self.crop_rectangle)
             processed_image = self.view_model.fill_image(coords)
             processed_image.show()
-            self.view_model.export_image(processed_image)
+
+            _, original_dir, file_name, file_extension = get_default_cropped_file_path(self.view_model.get_file_path())
+
+            # Ask user to choose the save file path
+            new_file_path = filedialog.asksaveasfilename(initialdir=original_dir,
+                                                         initialfile=f"{file_name}_cropped{file_extension}",
+                                                         defaultextension=file_extension,
+                                                         filetypes=[("All files", "*.*")])
+
+            # If the user provides a file path, save the image
+            if new_file_path:
+                self.view_model.export_image(processed_image, new_file_path)
+
             self.canvas_component.canvas.delete(self.crop_rectangle)
             self.crop_rectangle = None
 
     def move_left(self, event):
+        move_vector = (self.zoom_constant, 0)
+        self.view_model.move_image(move_vector)
         self.canvas_component.canvas.move(self.image_on_canvas, -self.zoom_constant, 0)
 
     def move_right(self, event):
+        move_vector = (-self.zoom_constant, 0)
+        self.view_model.move_image(move_vector)
         self.canvas_component.canvas.move(self.image_on_canvas, self.zoom_constant, 0)
 
     def move_up(self, event):
+        move_vector = (0, self.zoom_constant)
+        self.view_model.move_image(move_vector)
         self.canvas_component.canvas.move(self.image_on_canvas, 0, -self.zoom_constant)
 
     def move_down(self, event):
+        move_vector = (0, -self.zoom_constant)
+        self.view_model.move_image(move_vector)
         self.canvas_component.canvas.move(self.image_on_canvas, 0, self.zoom_constant)
