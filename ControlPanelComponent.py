@@ -2,13 +2,15 @@ from tkinter import Frame, Button
 
 
 class ControlPanelComponent:
-    def __init__(self, master, on_load, on_zoom_in, on_zoom_out):
+    def __init__(self, master, on_load, on_zoom_in, on_zoom_out, on_settings):
+
         self.frame = Frame(master)
         self.load_button = Button(self.frame, text="Load Image", command=on_load, bg="lightblue")
         self.zoom_in_button = Button(self.frame, text="Zoom In", command=on_zoom_in, bg="lightgreen")
         self.zoom_out_button = Button(self.frame, text="Zoom Out", command=on_zoom_out, bg="salmon")
-
+        self.settings_button = Button(self.frame, text="Settings", command=on_settings, bg="lightgray")
         self.load_button.pack(side="left")
         self.zoom_in_button.pack(side="left")
         self.zoom_out_button.pack(side="left")
+        self.settings_button.pack(side="left")
         self.frame.pack(pady=10)

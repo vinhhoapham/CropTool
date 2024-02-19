@@ -38,3 +38,27 @@ class ImageViewModel:
     def get_file_path(self):
         return self.model.path
 
+    def is_asking_for_directory_when_saving(self):
+        return self.model.settings.ask_for_directory_when_saving
+
+    def update_default_save_path(self, new_path):
+        self.model.settings.update_default_save_path(new_path)
+
+    # Method to update the save_pic_with_circle setting
+    def update_save_pic_with_circle(self, value):
+        self.model.settings.update_option("save_pic_with_circle", value)
+
+    # Method to update the save_pic_with_no_circle setting
+    def update_save_pic_with_no_circle(self, value):
+        self.model.settings.update_option("save_pic_with_no_circle", value)
+
+    # Method to update the output image resolution setting
+    def update_output_image_resolution(self, width, height):
+        self.model.settings.update_resolution(width, height)
+
+    # Method to update the ask_for_directory_when_saving setting
+    def update_ask_for_directory_when_saving(self, value):
+        self.model.settings.update_ask_for_directory(value)
+
+    def update_circle_diameter(self, new_diameter):
+        self.model.settings.update_circle_diameter(new_diameter)

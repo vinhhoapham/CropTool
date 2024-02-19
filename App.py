@@ -5,6 +5,7 @@ from ImageView import ImageView
 
 if __name__ == "__main__":
     root = Tk()
+    root.title("Crop Tool")
     model = ImageModel()
     view_model = ImageViewModel(model)
     app = ImageView(root, view_model)

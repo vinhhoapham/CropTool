@@ -16,3 +16,6 @@ class Resolution():
     def is_in_resolution(self, coordinate):
         row, col = coordinate.get_tuple()
         return 0 <= row < self.height and 0 <= col < self.width
+
+    def __str__(self):
+        return f"{self.width}x{self.height}"

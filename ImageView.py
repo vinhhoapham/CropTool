@@ -5,7 +5,8 @@ from MenuBarComponent import MenuBarComponent
 from StatusBarComponent import StatusBarComponent
 from CanvasComponent import CanvasComponent
 from ControlPanelComponent import ControlPanelComponent
-from PathHandling import get_default_cropped_file_path, get_dir
+from PathHandling import get_default_cropped_file_path
+from SettingsPopupComponent import SettingsPopupComponent
 
 
 class ImageView:
@@ -19,12 +20,13 @@ class ImageView:
         self.center_circle = None
         self.tk_image = None
         self.image_on_canvas = None
-        self.master.title = 'Crop and Center Tool'
+        self.master.title('Crop and Center Tool')
 
         # Initialize components
-        self.menubar = MenuBarComponent(master, self.load_image, master.quit)
+        self.menubar = MenuBarComponent(master, self.load_image, master.quit, self.open_settings_popup)
         self.status_bar = StatusBarComponent(master)
-        self.control_panel = ControlPanelComponent(master, self.load_image, self.zoom_in, self.zoom_out)
+        self.control_panel = ControlPanelComponent(master, self.load_image, self.zoom_in, self.zoom_out,
+                                                   self.open_settings_popup)
         self.canvas_component = CanvasComponent(master, self.on_move_press, self.crop_image)
 
         # Bind keyboard events for image movement
@@ -93,22 +95,23 @@ class ImageView:
         if self.crop_rectangle and self.view_model.is_image_loaded():
             coords = self.canvas_component.canvas.coords(self.crop_rectangle)
             processed_image = self.view_model.fill_image(coords)
-            processed_image.show()
+            new_file_path = None
 
-            _, original_dir, file_name, file_extension = get_default_cropped_file_path(self.view_model.get_file_path())
+            if self.view_model.is_asking_for_directory_when_saving():
+                _, original_dir, file_name, file_extension = get_default_cropped_file_path(
+                    self.view_model.get_file_path())
+                new_file_path = filedialog.asksaveasfilename(initialdir=original_dir,
+                                                             initialfile=f"{file_name}_cropped{file_extension}",
+                                                             defaultextension=file_extension,
+                                                             filetypes=[("All files", "*.*")])
 
-            # Ask user to choose the save file path
-            new_file_path = filedialog.asksaveasfilename(initialdir=original_dir,
-                                                         initialfile=f"{file_name}_cropped{file_extension}",
-                                                         defaultextension=file_extension,
-                                                         filetypes=[("All files", "*.*")])
-
-            # If the user provides a file path, save the image
-            if new_file_path:
-                self.view_model.export_image(processed_image, new_file_path)
+            self.view_model.export_image(processed_image, new_file_path)
 
             self.canvas_component.canvas.delete(self.crop_rectangle)
             self.crop_rectangle = None
+
+    def open_settings_popup(self):
+        SettingsPopupComponent(self.master, self.view_model)
 
     def move_left(self, event):
         move_vector = (self.zoom_constant, 0)

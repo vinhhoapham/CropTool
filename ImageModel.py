@@ -2,6 +2,15 @@ from PIL import Image
 from Resolution import Resolution
 from Coordinate import Coordinate
 import numpy as np
+from Settings import Settings
+import PathHandling
+from ImageHandling import add_circle_to_grayscale_image
+
+
+def calculate_average_pixel_value(image_array):
+    mask = image_array != -1
+    values = image_array[mask]
+    return int(np.mean(values))
 
 
 class ImageModel:
@@ -11,6 +20,8 @@ class ImageModel:
         self.path = None
         self.new_image_resolution = Resolution(1920, 1080)
         self.image_displacement = Coordinate(0, 0)
+        self.settings = Settings()
+        self.new_image_resolution = self.settings.output_image_resolution
 
     def load_image(self, file_path):
         self.image = Image.open(file_path).convert('L')
@@ -20,7 +31,6 @@ class ImageModel:
 
     def zoom_out(self):
         self.zoom_factor /= 1.1
-
 
     def get_resized_image(self):
         if self.image:
@@ -45,13 +55,13 @@ class ImageModel:
     def fill_image(self, crop_coords):
         # Plus the displacement to the crop coordinates
         crop_coords = (crop_coords[0] + self.image_displacement.row,
-                          crop_coords[1] + self.image_displacement.col,
-                          crop_coords[2] + self.image_displacement.row,
-                          crop_coords[3] + self.image_displacement.col)
+                       crop_coords[1] + self.image_displacement.col,
+                       crop_coords[2] + self.image_displacement.row,
+                       crop_coords[3] + self.image_displacement.col)
 
         cropped_image_array = self.crop_image_array(crop_coords)
 
-        avg_pixel_value = self.calculate_average_pixel_value(cropped_image_array)
+        avg_pixel_value = calculate_average_pixel_value(cropped_image_array)
         mask = cropped_image_array == -1
 
         filled_image_array = cropped_image_array
@@ -60,13 +70,19 @@ class ImageModel:
         filled_image = Image.fromarray(filled_image_array, 'L')
         return filled_image
 
-    def calculate_average_pixel_value(self, image_array):
-        mask = image_array != -1
-        values = image_array[mask]
-        return int(np.mean(values))
+    def export_image(self, image, file_path=None):
+        if file_path is None:
+            # Use settings to determine the save location and filename
+            _, _, file_name, ext = PathHandling.get_default_cropped_file_path(self.path)
+            save_directory = self.settings.default_save_path
 
-    def export_image(self, image, file_path):
-        image.save(file_path)
-
-
-
+            if self.settings.save_pic_with_no_circle:
+                save_path = PathHandling.generate_save_path(save_directory, file_name, ext, "cropped")
+                image.save(save_path)
+            if self.settings.save_pic_with_circle:
+                diameter = self.settings.circle_diameter
+                image_with_circle = add_circle_to_grayscale_image(image.copy(), diameter)
+                save_path = PathHandling.generate_save_path(save_directory, file_name, ext, "cropped_with_circle")
+                image_with_circle.save(save_path)
+        else:
+            image.save(file_path)
