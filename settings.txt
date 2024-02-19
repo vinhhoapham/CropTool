@@ -1,0 +1,6 @@
+default_save_path=/Users/vinhpham/Documents/CropTool
+save_pic_with_circle=True
+save_pic_with_no_circle=True
+output_image_resolution=1920x1080
+ask_for_directory_when_saving=False
+circle_diameter=236
